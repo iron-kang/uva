@@ -72,9 +72,6 @@ bool cryptanalysis(std::istream &in)
     get_chars(in, lines, charas);
     chars_cal(result, charas);
 
-    charas.clear();
-    result.clear();
-
     return true;
 }
 
