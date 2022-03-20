@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include <map>
 #include <algorithm>
-#define ONLINE_JUDGE
+// #define ONLINE_JUDGE
 #ifndef ONLINE_JUDGE
 #include <gmock/gmock.h>
 #endif
@@ -24,7 +24,7 @@ bool cmp(const pair<char, int> &p1, const pair<char, int> &p2)
         return false;
 }
 
-void get_chars(std::istream &in, int &lines, map<char, int, less<char>> &charas)
+void extract_letters(std::istream &in, int &lines, map<char, int, less<char>> &letters)
 {
     string text;
     while (lines-- > 0)
@@ -34,33 +34,27 @@ void get_chars(std::istream &in, int &lines, map<char, int, less<char>> &charas)
         for (auto &c : text)
         {
             if (isalpha(c))
-            {
-                charas[toupper(c)]++;
-            }
+                letters[toupper(c)]++;
         }
     }
 }
 
-void chars_cal(vector<pair<char, int>> &result, map<char, int, less<char>> &charas)
+void sort_letters(vector<pair<char, int>> &result, map<char, int, less<char>> &letters)
 {
 
-    for (auto &c : charas)
-    {
+    for (auto &c : letters)
         result.push_back(make_pair(c.first, c.second));
-    }
 
     sort(result.begin(), result.end(), cmp);
 
     for (auto &t : result)
-    {
         cout << t.first << " " << t.second << endl;
-    }
 }
 
 bool cryptanalysis(std::istream &in)
 {
     string line;
-    map<char, int, less<char>> charas;
+    map<char, int, less<char>> letters;
     vector<pair<char, int>> result;
 
     getline(in, line);
@@ -69,8 +63,8 @@ bool cryptanalysis(std::istream &in)
 
     int lines = stoi(line);
 
-    get_chars(in, lines, charas);
-    chars_cal(result, charas);
+    extract_letters(in, lines, letters);
+    sort_letters(result, letters);
 
     return true;
 }
@@ -78,7 +72,6 @@ bool cryptanalysis(std::istream &in)
 int main(int argc, char **argv)
 {
 #ifdef ONLINE_JUDGE
-
     while (true)
     {
         if (!cryptanalysis(cin))
