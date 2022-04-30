@@ -10,7 +10,6 @@ No
 
 Yes
 
-
 )"};
 
     testing::internal::CaptureStdout();
@@ -64,7 +63,6 @@ Yes
 
 Yes
 Yes
-
 
 )"};
 
@@ -377,7 +375,6 @@ No
 No
 Yes
 Yes
-
 
 )"};
 
