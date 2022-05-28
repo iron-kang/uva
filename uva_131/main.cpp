@@ -540,7 +540,6 @@ std::string Holdem::find_the_best_hand()
 void solve_uva(std::istream &in)
 {
     std::string line;
-    std::vector<Poker> cards, deck, hand;
     std::string tok;
 
     while (true)
@@ -554,19 +553,15 @@ void solve_uva(std::istream &in)
         int i = 0;
         std::string hand_str;
         std::string deck_str;
-        hand.clear();
-        deck.clear();
         while (std::getline(ss, tok, ' '))
         {
             if (i++ > 4)
             {
-                // deck.push_back(tok);
                 deck_str += tok + " ";
                 holdem.save_cards(tok, HandDeck::DECK);
             }
             else
             {
-                // hand.push_back(tok);
                 hand_str += tok + " ";
                 holdem.save_cards(tok, HandDeck::HAND);
             }
@@ -575,26 +570,6 @@ void solve_uva(std::istream &in)
         std::string ret;
         ret = "Hand: " + hand_str + "Deck: " + deck_str + "Best hand: ";
         ret += holdem.find_the_best_hand();
-#if 0
-        if (is_flush(hand, deck, true))
-            ret += "straight-flush";
-        else if (is_four_of_a_kind(hand, deck))
-            ret += "four-of-a-kind";
-        else if (is_full_house(hand, deck))
-            ret += "full-house";
-        else if (is_flush(hand, deck, false))
-            ret += "flush";
-        else if (is_straight(hand, deck))
-            ret += "straight";
-        else if (is_three_of_a_kind(hand, deck))
-            ret += "three-of-a-kind";
-        else if (is_two_pairs(hand, deck))
-            ret += "two-pairs";
-        else if (is_one_pairs(hand, deck))
-            ret += "one-pair";
-        else
-            ret += "highest-card";
-#endif
 
         std::cout << ret << std::endl;
     }
