@@ -575,8 +575,6 @@ void solve_uva(std::istream &in)
     }
 }
 
-void (*fptr[5])(void);
-
 int main(int argc, char **argv)
 {
 #ifdef ONLINE_JUDGE
