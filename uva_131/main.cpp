@@ -8,7 +8,7 @@
 #include <set>
 #include <math.h>
 #include <algorithm>
-// #define ONLINE_JUDGE
+ #define ONLINE_JUDGE
 #ifndef ONLINE_JUDGE
 #include <gmock/gmock.h>
 #endif
