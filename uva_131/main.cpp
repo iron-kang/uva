@@ -241,6 +241,7 @@ bool Holdem::is_four_of_a_kind()
 
 bool Holdem::is_full_house()
 {
+    /* (value, counts) */
     std::map<int, int> candidate_value, candidate_value_tmp;
 
     /* count card's value */
@@ -250,6 +251,7 @@ bool Holdem::is_full_house()
         candidate_value[tmp_value]++;
     }
 
+    /* check card combination in hand */
     for (auto it_1 = candidate_value.begin(); it_1 != candidate_value.end(); ++it_1)
     {
         candidate_value_tmp = candidate_value;
@@ -490,6 +492,7 @@ bool Holdem::is_one_pairs()
             return true;
     }
 
+    /* no pair in hand */
     for (auto &hand : hands)
     {
         int exchange_cards = 4;
