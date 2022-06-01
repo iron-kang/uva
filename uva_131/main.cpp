@@ -185,7 +185,7 @@ bool Holdem::is_flush(bool check_straight)
         }
     }
 
-    /* four_of_a_kind in deck*/
+    /* flush in deck*/
     cur_suit = decks[0].get_suit();
     for (size_t i = 1; i < decks.size(); i++)
     {
@@ -254,15 +254,19 @@ bool Holdem::is_full_house()
     /* check card combination in hand */
     for (auto it_1 = candidate_value.begin(); it_1 != candidate_value.end(); ++it_1)
     {
-        candidate_value_tmp = candidate_value;
+        int value_1 = 0;
+        int value_2 = 0;
+
+        /* use two different value in hand to prmutate */
         for (auto it_2 = it_1; it_2 != candidate_value.end(); ++it_2)
         {
+            candidate_value_tmp = candidate_value;
             if (it_2 == it_1)
                 continue;
             int need_cards = 5 - it_1->second - it_2->second;
 
-            int value_1 = it_1->first;
-            int value_2 = it_2->first;
+            value_1 = it_1->first;
+            value_2 = it_2->first;
 
             for (int i = 0; i < need_cards; i++)
             {
@@ -275,6 +279,19 @@ bool Holdem::is_full_house()
                 ((candidate_value_tmp[value_1] == 3) && (candidate_value_tmp[value_2] == 2)))
                 return true;
         }
+
+        /* use one value in hand and another in deck to prmutate */
+        candidate_value_tmp = candidate_value;
+        for (int i = 0; i < 4; i++)
+        {
+            int deck_value = decks[i].get_value();
+            value_2 = deck_value != value_1 ? deck_value : 0;
+            candidate_value_tmp[deck_value]++;
+        }
+
+        if (((candidate_value_tmp[value_1] == 2) && (candidate_value_tmp[value_2] == 3)) ||
+                ((candidate_value_tmp[value_1] == 3) && (candidate_value_tmp[value_2] == 2)))
+                return true;
     }
 
     /* full_house in deck*/
@@ -298,14 +315,16 @@ bool Holdem::is_full_house()
 bool Holdem::is_straight()
 {
     std::vector<Poker> tmp_hand = hands;
+    std::vector<Poker> tmp_deck = decks;
     std::vector<int> candidate_values[5];
     std::sort(tmp_hand.begin(), tmp_hand.end(), Poker::cmp_value);
     int prev_value = 0;
+    int cur_value = 0;
     int i = 0;
 
     for (auto &hand : tmp_hand)
     {
-        int cur_value = hand.get_value();
+        cur_value = hand.get_value();
         if (prev_value == 0)
         {
             prev_value = cur_value;
@@ -327,13 +346,15 @@ bool Holdem::is_straight()
 
     if (candidate_values[0].size() == 5)
         return true;
-    else if ((candidate_values[0][0] == 1) && (candidate_values[1][3] == 13))
+    else if ((candidate_values[1].size() == 4) && 
+             (candidate_values[0][0] == 1) && 
+             (candidate_values[1][3] == 13))
     {
-        /* handle A 10 11 12 13 case */
+        /* handle A 10 J Q K case */
         return true;
     }
 
-    for (int i = 0; i < 5; i++)
+    for (i = 0; i < 5; i++)
     {
         if (candidate_values[i].size() == 0)
             break;
@@ -375,6 +396,28 @@ bool Holdem::is_straight()
             return true;
     }
 
+    /* straight in deck */
+    std::sort(tmp_deck.begin(), tmp_deck.end(), Poker::cmp_value);
+    int cnt = 1;
+    cur_value = 0;
+    prev_value = tmp_deck[0].get_value();
+
+    for (i = 1; i < tmp_deck.size(); i++)
+    {
+        cur_value = tmp_deck[i].get_value();
+        if (cur_value == (prev_value + 1))
+            cnt++;
+        else 
+            cnt = 1;
+        prev_value = cur_value;
+    }
+
+    if ((cnt == 4) && (tmp_deck[0].get_value()==1) && (cur_value == 13))
+        cnt = 5;
+
+    if (cnt == 5) 
+        return true;
+
     return false;
 }
 
@@ -407,7 +450,7 @@ bool Holdem::is_three_of_a_kind()
             return true;
     }
 
-    /* four_of_a_kind in deck*/
+    /* three_of_a_kind in deck */
     candidate_value.clear();
     for (auto &card : decks)
     {
@@ -433,15 +476,19 @@ bool Holdem::is_two_pairs()
 
     for (auto it_1 = candidate_value.begin(); it_1 != candidate_value.end(); ++it_1)
     {
-        candidate_value_tmp = candidate_value;
+        int value_1 = 0;
+        int value_2 = 0;
+        
+        /* use two different value in hand to prmutate */
         for (auto it_2 = it_1; it_2 != candidate_value.end(); ++it_2)
         {
+            candidate_value_tmp = candidate_value;
             if (it_2 == it_1)
                 continue;
             int need_cards = 5 - it_1->second - it_2->second;
 
-            int value_1 = it_1->first;
-            int value_2 = it_2->first;
+            value_1 = it_1->first;
+            value_2 = it_2->first;
 
             for (int i = 0; i < need_cards; i++)
             {
@@ -453,9 +500,21 @@ bool Holdem::is_two_pairs()
             if ((candidate_value_tmp[value_1] == 2) && (candidate_value_tmp[value_2] == 2))
                 return true;
         }
+        
+        /* use one value in hand and another in deck to prmutate */
+        candidate_value_tmp = candidate_value;
+        for (int i = 0; i < 3; i++)
+        {
+            int deck_value = decks[i].get_value();
+            value_2 = deck_value != value_1 ? deck_value : 0;
+            candidate_value_tmp[deck_value]++;
+        }
+
+        if ((candidate_value_tmp[value_1] == 2) && (candidate_value_tmp[value_2] == 2))
+            return true;   
     }
 
-    /* full_house in deck*/
+    /* two_pairs in deck*/
     candidate_value.clear();
     for (auto &card : decks)
     {
@@ -504,7 +563,7 @@ bool Holdem::is_one_pairs()
         }
     }
 
-    /* full_house in deck*/
+    /* one_pairs in deck*/
     candidate_value.clear();
     for (auto &deck : hands)
     {
