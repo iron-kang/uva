@@ -23,9 +23,15 @@ public:
         LOSS,
         DRAW
     };
+
     PokerGame(const int &pile_num) : pile_num_(pile_num)
     {
         round_ = 0;
+        deck.clear();
+        piles.clear();
+        remove_pile.clear();
+        records.clear();
+
         for (int i = 0; i < pile_num_; i++)
         {
             piles.push_back(std::deque<int>());
@@ -34,7 +40,7 @@ public:
 
     int get_rounds() { return round_; }
     void get_cards(const int &card);
-    RESULT check_result();
+    RESULT result();
 
 private:
     unsigned int pile_num_;
@@ -42,78 +48,67 @@ private:
     std::deque<int> deck;
     std::vector<std::deque<int>> piles;
     std::set<int> remove_pile;
+    std::set<std::deque<int>> records;
 
-    std::set<std::string> records;
-
-    bool check_win();
-    bool check_draw();
-    bool check_sum_cond(const int &sum);
-    void check_combinations(const int &i);
+    void check_combinations(const int &id);
 };
-
-bool PokerGame::check_sum_cond(const int &sum)
-{
-    if ((sum == 10) || (sum == 20) || (sum == 30))
-        return true;
-    return false;
-}
 
 void PokerGame::get_cards(const int &card)
 {
     deck.push_back(card);
 }
 
-void PokerGame::check_combinations(const int &i)
+void PokerGame::check_combinations(const int &id)
 {
 
     int remove_cards[3];
-
     int pile_size;
-    pile_size = piles[i].size();
+
+    pile_size = piles[id].size();
     if (pile_size < 3)
         return;
 
-    while ((pile_size = piles[i].size()) >= 3)
+    while ((pile_size = piles[id].size()) >= 3)
     {
-        int sum = piles[i][0] + piles[i][1] + piles[i][pile_size - 1];
-        if (check_sum_cond(sum))
+        int sum = piles[id][0] + piles[id][1] + piles[id][pile_size - 1];
+        if ((sum % 10) == 0)
         {
-            remove_cards[0] = piles[i].front();
-            piles[i].pop_front();
-            remove_cards[1] = piles[i].front();
-            piles[i].pop_front();
-            remove_cards[2] = piles[i].back();
-            piles[i].pop_back();
+            remove_cards[0] = piles[id].front();
+            piles[id].pop_front();
+            remove_cards[1] = piles[id].front();
+            piles[id].pop_front();
+            remove_cards[2] = piles[id].back();
+            piles[id].pop_back();
 
             for (int j = 0; j < 3; j++)
                 deck.push_back(remove_cards[j]);
             continue;
         }
 
-        sum = piles[i][0] + piles[i][pile_size - 2] + piles[i][pile_size - 1];
-        if (check_sum_cond(sum))
+        sum = piles[id][0] + piles[id][pile_size - 2] + piles[id][pile_size - 1];
+        if ((sum % 10) == 0)
         {
-            remove_cards[0] = piles[i].front();
-            piles[i].pop_front();
-            remove_cards[2] = piles[i].back();
-            piles[i].pop_back();
-            remove_cards[1] = piles[i].back();
-            piles[i].pop_back();
+            remove_cards[0] = piles[id].front();
+            piles[id].pop_front();
+            remove_cards[2] = piles[id].back();
+            piles[id].pop_back();
+            remove_cards[1] = piles[id].back();
+            piles[id].pop_back();
 
             for (int j = 0; j < 3; j++)
                 deck.push_back(remove_cards[j]);
             continue;
         }
 
-        sum = piles[i][pile_size - 3] + piles[i][pile_size - 2] + piles[i][pile_size - 1];
-        if (check_sum_cond(sum))
+        sum = piles[id][pile_size - 3] + piles[id][pile_size - 2] + piles[id][pile_size - 1];
+        if ((sum % 10) == 0)
         {
-            remove_cards[2] = piles[i].back();
-            piles[i].pop_back();
-            remove_cards[1] = piles[i].back();
-            piles[i].pop_back();
-            remove_cards[0] = piles[i].back();
-            piles[i].pop_back();
+            remove_cards[2] = piles[id].back();
+            piles[id].pop_back();
+            remove_cards[1] = piles[id].back();
+            piles[id].pop_back();
+            remove_cards[0] = piles[id].back();
+            piles[id].pop_back();
 
             for (int j = 0; j < 3; j++)
                 deck.push_back(remove_cards[j]);
@@ -123,18 +118,18 @@ void PokerGame::check_combinations(const int &i)
         break;
     }
 
-    if (piles[i].size() == 0)
-        remove_pile.insert(i);
+    if (piles[id].size() == 0)
+        remove_pile.insert(id);
 }
 
-PokerGame::RESULT PokerGame::check_result()
+PokerGame::RESULT PokerGame::result()
 {
     int i = 0;
     round_ = 0;
 
     while (deck.size())
     {
-        if (remove_pile.find(i % 7) != remove_pile.end())
+        if (remove_pile.find(i % pile_num_) != remove_pile.end())
         {
             i++;
             continue;
@@ -142,26 +137,28 @@ PokerGame::RESULT PokerGame::check_result()
         int card = deck.front();
         deck.pop_front();
 
-        piles[i % 7].push_back(card);
+        piles[i % pile_num_].push_back(card);
 
-        check_combinations(i % 7);
+        check_combinations(i % pile_num_);
         round_++;
         i++;
 
         if (remove_pile.size() == pile_num_)
             return RESULT::WIN;
 
-        std::stringstream record;
-        std::copy(deck.begin(), deck.end(), std::ostream_iterator<int>(record, " "));
+        std::deque<int> record;
+        std::deque<int>::iterator it = record.begin();
+
+        record.insert(it, deck.begin(), deck.end());
         for (auto &pile : piles)
         {
-            std::stringstream tmp;
-            std::copy(pile.begin(), pile.end(), std::ostream_iterator<int>(tmp, " "));
-            record << tmp.str();
+            it = record.end();
+            record.insert(it, pile.begin(), pile.end());
         }
-        if (records.find(record.str()) != records.end())
+
+        if (records.find(record) != records.end())
             return RESULT::DRAW;
-        records.insert(record.str());
+        records.insert(record);
     }
 
     return RESULT::LOSS;
@@ -169,12 +166,13 @@ PokerGame::RESULT PokerGame::check_result()
 
 void solve_uva(std::istream &in)
 {
-    std::string line;
+    int piles_num = 7;
 
     while (true)
     {
         int point, i = 0;
-        PokerGame pg(7);
+        PokerGame pg(piles_num);
+
         while (i++ < 52)
         {
             in >> point;
@@ -183,7 +181,7 @@ void solve_uva(std::istream &in)
             pg.get_cards(point);
         }
 
-        switch (pg.check_result())
+        switch (pg.result())
         {
         case PokerGame::RESULT::WIN:
             std::cout << "Win : " << pg.get_rounds() << std::endl;
@@ -193,9 +191,6 @@ void solve_uva(std::istream &in)
             break;
         case PokerGame::RESULT::LOSS:
             std::cout << "Loss: " << pg.get_rounds() << std::endl;
-            break;
-        default:
-            std::cout << "unknown" << std::endl;
             break;
         }
     }
