@@ -155,8 +155,9 @@ void solve_uva(std::istream &in)
         robot.run(in);
         pos = robot.get_pos();
 
-        std::cout << pos.row_ << " " << pos.col_ << " " << robot.get_dir() << std::endl
-                  << std::endl;
+        std::cout << pos.row_ << " " << pos.col_ << " " << robot.get_dir() << std::endl;
+        if (sample_count)
+            std::cout << std::endl;
     }
 }
 
